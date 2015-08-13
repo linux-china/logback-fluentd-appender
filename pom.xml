@@ -81,14 +81,12 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.fluentd</groupId>
             <artifactId>fluent-logger</artifactId>
             <version>${fluentd.logger.version}</version>
-            <optional>true</optional>
         </dependency>
 
         <dependency>

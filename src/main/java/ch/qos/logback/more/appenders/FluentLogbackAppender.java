@@ -73,7 +73,7 @@ public class FluentLogbackAppender<E> extends UnsynchronizedAppenderBase<E> {
 
         @Override
         protected void append(E rawData) {
-            String msg = null;
+            String msg;
             if (layout != null) {
                 msg = layout.doLayout(rawData);
             } else {

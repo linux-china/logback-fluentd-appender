@@ -1,4 +1,4 @@
-Logback more appenders
+Logback fluentd appender
 ==================================================
 is appenders for [Logback](http://logback.qos.ch/).
 You can logging to Fluentd with the logback appender.
@@ -39,7 +39,7 @@ Configure your pom.xml:
 ### Configure your logback.xml
 You can find configuration files here:
  
-- [logback.xml](https://github.com/sndyuk/logback-more-appenders/blob/master/src/test/resources/logback.xml)
+- [logback.xml](https://github.com/linux-china/logback-fluentd-appender/blob/master/src/test/resources/logback.xml)
 
 
 License

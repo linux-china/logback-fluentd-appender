@@ -98,7 +98,6 @@ public class DataFluentAppender extends UnsynchronizedAppenderBase<ILoggingEvent
 
 	private DaemonAppender<ILoggingEvent> appender;
 
-	// リモートホストに接続できないときに何件までログを保持するか（件数制限に達している時にきたログは破棄する）
 	private int maxQueueSize;
 
 	@Override

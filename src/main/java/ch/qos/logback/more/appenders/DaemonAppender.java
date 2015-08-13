@@ -1,17 +1,17 @@
 /**
  * Copyright (c) 2012 sndyuk <sanada@sndyuk.com>
- *
- *  Permission is hereby granted, free of charge, to any person obtaining
+ * <p>
+ * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -33,70 +33,70 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class DaemonAppender<E> implements Runnable {
-	private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
+    private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(DaemonAppender.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DaemonAppender.class);
 
-	private AtomicBoolean start = new AtomicBoolean(false);
-	private final BlockingQueue<E> queue;
+    private AtomicBoolean start = new AtomicBoolean(false);
+    private final BlockingQueue<E> queue;
 
-	DaemonAppender(int maxQueueSize) {
-		this.queue = new LinkedBlockingQueue<E>(maxQueueSize);
-	}
+    DaemonAppender(int maxQueueSize) {
+        this.queue = new LinkedBlockingQueue<E>(maxQueueSize);
+    }
 
-	protected void execute() {
-		THREAD_POOL.execute(this);
-	}
-	
-	void log(E eventObject) {
-		if (!queue.offer(eventObject)) {
-			LOG.warn("Message queue is full. Ignore the message.");
-		} else if (start.compareAndSet(false, true)) {
-			execute();
-		}
-	}
+    protected void execute() {
+        THREAD_POOL.execute(this);
+    }
 
-	@Override
-	public void run() {
+    void log(E eventObject) {
+        if (!queue.offer(eventObject)) {
+            LOG.warn("Message queue is full. Ignore the message.");
+        } else if (start.compareAndSet(false, true)) {
+            execute();
+        }
+    }
 
-		try {
-			for (;;) {
-				append(queue.take());
-			}
-		} catch (InterruptedException e) {
-			// ignore the error and rerun.
-			run();
-		} catch (Exception e) {
-			close();
-		}
-	}
+    @Override
+    public void run() {
 
-	abstract protected void append(E rawData);
+        try {
+            //noinspection InfiniteLoopStatement
+            for (; ; ) {
+                append(queue.take());
+            }
+        } catch (InterruptedException ignore) {
+            // ignore the error and rerun.
+            run();
+        } catch (Exception ignore) {
+            close();
+        }
+    }
 
-	protected void close() {
-		synchronized (THREAD_POOL) {
-			if (!THREAD_POOL.isShutdown()) {
-				shutdownAndAwaitTermination(THREAD_POOL);
-			}
-		}
-	}
+    abstract protected void append(E rawData);
 
-	private static void shutdownAndAwaitTermination(ExecutorService pool) {
-		pool.shutdown(); // Disable new tasks from being submitted
-		try {
-			// Wait a while for existing tasks to terminate
-			if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
-				pool.shutdownNow(); // Cancel currently executing tasks
-				// Wait a while for tasks to respond to being cancelled
-				if (!pool.awaitTermination(60, TimeUnit.SECONDS))
-					System.err.println("Pool did not terminate");
-			}
-		} catch (InterruptedException ie) {
-			// (Re-)Cancel if current thread also interrupted
-			pool.shutdownNow();
-			// Preserve interrupt status
-			Thread.currentThread().interrupt();
-		}
-	}
+    protected void close() {
+        synchronized (THREAD_POOL) {
+            if (!THREAD_POOL.isShutdown()) {
+                shutdownAndAwaitTermination(THREAD_POOL);
+            }
+        }
+    }
+
+    private static void shutdownAndAwaitTermination(ExecutorService pool) {
+        pool.shutdown(); // Disable new tasks from being submitted
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+                pool.shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!pool.awaitTermination(60, TimeUnit.SECONDS))
+                    System.err.println("Pool did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            pool.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
+    }
 }
